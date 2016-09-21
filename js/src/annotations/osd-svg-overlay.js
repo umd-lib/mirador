@@ -880,6 +880,22 @@
       this.strokeColor = this.state.getStateProperty('drawingToolsSettings').strokeColor;
       this.fillColor = this.state.getStateProperty('drawingToolsSettings').fillColor;
       this.fillColorAlpha = this.state.getStateProperty('drawingToolsSettings').fillColorAlpha || FILL_COLOR_ALPHA_WORKAROUND;
+      for (var key in annotationTypeStyles) {
+        if (annotationTypeStyles.hasOwnProperty(key)) {
+          if (annotation['@type'].includes(key)) {
+            if (typeof annotationTypeStyles[key].strokeColor !== 'undefined') {
+              this.strokeColor = annotationTypeStyles[key].strokeColor;
+            }
+            if (typeof annotationTypeStyles[key].fillColor !== 'undefined') {
+              this.fillColor = annotationTypeStyles[key].fillColor;
+            }
+            if (typeof annotationTypeStyles[key].fillColorAlpha !== 'undefined') {
+              this.fillColorAlpha = annotationTypeStyles[key].fillColorAlpha;
+            }
+            break;
+          }
+        }
+      }
       this.mode = 'create';
       this.path = rect.createShape(initialPoint, this);
       var eventData = {
