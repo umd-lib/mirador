@@ -152,19 +152,22 @@
       }
     },
 
-    onHover:function(activate,shape,hoverWidth,hoverColor){
-      shape.strokeWidth = hoverWidth;
-
+    onHover:function(activate,shape,hoverColor,hoverFillColor,hoverFillColorAlpha){
       // shape needs to have hovered styles
       if(activate && !shape.data.hovered){
-        shape.data.nonHoverStrokeColor = shape.strokeColor.clone();
+        shape.data.nonHoverStroke = shape.strokeColor.clone();
+        shape.data.nonHoverFill = shape.fillColor.clone();
         shape.data.hovered = true;
         shape.strokeColor = hoverColor;
+        shape.fillColor = hoverFillColor;
+        shape.fillColor.alpha = hoverFillColorAlpha;
       }
       // shape is not longer hovered
       if(!activate && shape.data.hovered){
-        shape.strokeColor = shape.data.nonHoverStrokeColor.clone();
-        delete shape.data.nonHoverStrokeColorColor;
+        shape.strokeColor = shape.data.nonHoverStroke.clone();
+        shape.fillColor = shape.data.nonHoverFill.clone();
+        delete shape.data.nonHoverStroke;
+        delete shape.data.nonHoverFill;
         delete shape.data.hovered;
       }
     },
