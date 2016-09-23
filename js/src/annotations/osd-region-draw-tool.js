@@ -179,17 +179,18 @@
           for (var idx = 0; idx < shapeArray.length; idx++) {
             var shapeTool = this.svgOverlay.getTool(shapeArray[idx]);
             var hoverWidth = shapeArray[idx].data.strokeWidth / this.svgOverlay.paperScope.view.zoom;
+            var notShowTooltip = false;
+            var annoStyle = {
+              'hoverColor': hoverColor,
+              'hoverFillColor': hoverFillColor,
+              'hoverFillColorAlpha': hoverFillColorAlpha
+            };
             if (shapeArray[idx].hitTest(location, hitOptions)) {
               annotations.push(shapeArray[idx].data.annotation);
               if(shapeTool.onHover){
                 for(var k=0;k<shapeArray.length;k++){
-                  var annoStyle = {
-                    'hoverColor': hoverColor,
-                    'hoverFillColor': hoverFillColor,
-                    'hoverFillColorAlpha': hoverFillColorAlpha
-                  };
                   for (var styleKey in annotationTypeStyles) {
-                    if (annotationTypeStyles.hasOwnProperty(styleKey)) {
+                    if (annotationTypeStyles.hasOwnProperty(styleKey) && shapeArray[idx].data.annotation['@type'].includes(styleKey)) {
                       if (shapeArray[k].data.annotation['@type'].includes(styleKey)) {
                         if (typeof annotationTypeStyles[styleKey].hoverColor !== 'undefined') {
                           annoStyle.hoverColor = annotationTypeStyles[styleKey].hoverColor;
@@ -203,8 +204,21 @@
                         break;
                       }
                     }
+                    if (typeof annotationTypeStyles[styleKey].hoverFillColor !== 'undefined') {
+                      annoStyle.hoverFillColor = annotationTypeStyles[styleKey].hoverFillColor;
+                    }
+                    if (typeof annotationTypeStyles[styleKey].hoverFillColorAlpha !== 'undefined') {
+                      annoStyle.hoverFillColorAlpha = annotationTypeStyles[styleKey].hoverFillColorAlpha;
+                    }
+                    if (typeof annotationTypeStyles[styleKey].notShowTooltip !== 'undefined' && annotationTypeStyles[styleKey].notShowTooltip) {
+                      notShowTooltip = true;
+                    }
+                    break;
                   }
-                  shapeTool.onHover(true,shapeArray[k],annoStyle.hoverColor,annoStyle.hoverFillColor,annoStyle.hoverFillColorAlpha);
+                }
+                shapeTool.onHover(true,shapeArray[idx],annoStyle.hoverColor,annoStyle.hoverFillColor,annoStyle.hoverFillColorAlpha);
+                if (!notShowTooltip) {
+                  annotations.push(shapeArray[idx].data.annotation);
                 }
               }
               break;
