@@ -41,6 +41,7 @@ module.exports = function(grunt) {
     'js/lib/isfahan.js',
     'node_modules/paper/dist/paper-core.min.js',
     'node_modules/spectrum-colorpicker/spectrum.js',
+    'js/lib/i18next.min.js',
     'node_modules/i18next/i18next.min.js',
     'node_modules/i18next-browser-languagedetector/i18nextBrowserLanguageDetector.min.js',
     'node_modules/i18next-xhr-backend/i18nextXHRBackend.min.js',
@@ -49,7 +50,16 @@ module.exports = function(grunt) {
     'js/lib/sanitize-html.min.js',
     'node_modules/iiif-evented-canvas/dist/iiif-evented-canvas.umd.min.js',
     'node_modules/iiif-layout-functions/dist/iiif-layout-functions.umd.min.js',
-    'node_modules/select2/dist/js/select2.full.min.js'
+    'node_modules/select2/dist/js/select2.full.min.js',
+    'js/lib/paper-full.min.js',
+    'js/lib/spectrum.js',
+    'js/lib/openseadragonselection.js'
+  ],
+
+  // libraries/plugins for running tests
+  specJs = [
+    'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
+    'bower_components/sinon-server/index.js'
   ],
 
   // source files
