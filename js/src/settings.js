@@ -79,7 +79,8 @@
             "invert" : true,
             "mirror" : false
           }
-        }
+        },
+        "imageClipping": true
       },
       "fullScreen" : true, //whether or not to make the window's fullScreen button visible to user
       "displayLayout" : true, //whether or not to display all layout options, removing individual menu options is separate
