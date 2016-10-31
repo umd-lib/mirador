@@ -11,7 +11,13 @@
         defaultZoomLevel: 0,
         blendTime:        0.1,
         alwaysBlend:      false,
-        showNavigationControl: false
+        prefixUrl:        'images/openseadragon/',
+        showNavigationControl: false,
+        // umd custom options
+        gestureSettingsMouse: {
+          clickToZoom: false,
+          dblClickToZoom: true
+        }
       }, options)
 
     );

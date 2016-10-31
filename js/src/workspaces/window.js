@@ -376,9 +376,9 @@
       }));
 
       // TODO: temporary logic to minimize side panel if only tab is toc and toc is empty
-      _this.events.push(_this.eventEmitter.subscribe('sidePanelVisibilityByTab.' + this.id, function(event, visible) {
-        _this.sidePanelVisibility(visible, '0s');
-      }));
+      _this.eventEmitter.subscribe('sidePanelVisibilityByTab.' + this.id, function(event, visible) {
+        _this.sidePanelVisibility(visible, '0.3s');
+      });
 
       _this.events.push(_this.eventEmitter.subscribe('SET_CURRENT_CANVAS_ID.' + this.id, function(event, canvasID) {
         if (typeof canvasID === "string") {
