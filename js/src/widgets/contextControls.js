@@ -84,6 +84,8 @@
         this.manipulationElement.hide();
       }
 
+      this.setQtips(this.container.find('.mirador-clipping-control'));
+
       this.bindEvents();
     },
 
