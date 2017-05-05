@@ -41,6 +41,7 @@
     "fullScreenTooltip": "Toggle full screen",
     "fullScreenWindowTooltip": "Toggle this window to full screen",
     "grayscaleTooltip": "Toggle grayscale",
+    "imageClippingTooltip": "Toggle image clipper",
     "imageManipulationTooltip": "Toggle image manipulation",
     "imageView": "Image View",
     "invertTooltip": "Invert colors",
