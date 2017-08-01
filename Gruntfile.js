@@ -113,7 +113,7 @@ module.exports = function(grunt) {
         sourceMap: true
       },
       mirador: {
-        src: [vendors, sources],
+        src: [vendors, sources, plugins],
         dest: minified
       }
     },
@@ -203,6 +203,7 @@ module.exports = function(grunt) {
           'Gruntfile.js',
           'js/src/*.js',
           'js/src/*/*.js',
+          'js/plugins/*.js',
           'locales/*/*.json',
           'images/*',
           'css/*.css',
