@@ -36,11 +36,12 @@ module.exports = function(grunt) {
     'js/lib/URI.min.js',
     'js/lib/mousetrap.min.js',
     'js/lib/isfahan.js',
-    'js/lib/paper-full.min.js',
+    'js/lib/paper-core.min.js',
     'js/lib/spectrum.js',
     'js/lib/i18next.min.js',
     'js/lib/modernizr.custom.js',
-    'js/lib/openseadragonselection.js'
+    'js/lib/openseadragonselection.js',
+    'js/lib/sanitize-html.min.js'
   ],
 
   // source files
@@ -52,6 +53,11 @@ module.exports = function(grunt) {
     'js/src/workspaces/*.js',
     'js/src/widgets/*.js',
     'js/src/utils/*.js'
+  ];
+
+  // plugin files
+  plugins = [
+    'js/plugins/*.js'
   ];
 
   // ----------
@@ -75,7 +81,7 @@ module.exports = function(grunt) {
           banner: '//! <%= pkg.name %> <%= pkg.version %>\n' + '//! Built on <%= grunt.template.today("yyyy-mm-dd") %>\n',
           process: true
         },
-        src:  [ "<banner>" ].concat(vendors, sources),
+        src:  [ "<banner>" ].concat(vendors, sources, plugins),
         dest: distribution
       },
       css: {
