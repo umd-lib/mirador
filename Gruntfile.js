@@ -54,6 +54,11 @@ module.exports = function(grunt) {
     'js/src/utils/*.js'
   ];
 
+  // plugin files
+  plugins = [
+    'js/plugins/*.js'
+  ];
+
   // ----------
   // Project configuration.
   grunt.initConfig({
@@ -75,7 +80,7 @@ module.exports = function(grunt) {
           banner: '//! <%= pkg.name %> <%= pkg.version %>\n' + '//! Built on <%= grunt.template.today("yyyy-mm-dd") %>\n',
           process: true
         },
-        src:  [ "<banner>" ].concat(vendors, sources),
+        src:  [ "<banner>" ].concat(vendors, sources, plugins),
         dest: distribution
       },
       css: {
@@ -108,7 +113,7 @@ module.exports = function(grunt) {
         sourceMap: true
       },
       mirador: {
-        src: [vendors, sources],
+        src: [vendors, sources, plugins],
         dest: minified
       }
     },
@@ -198,6 +203,7 @@ module.exports = function(grunt) {
           'Gruntfile.js',
           'js/src/*.js',
           'js/src/*/*.js',
+          'js/plugins/*.js',
           'locales/*/*.json',
           'images/*',
           'css/*.css',
