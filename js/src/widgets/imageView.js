@@ -581,8 +581,8 @@
               document.body.appendChild(a);
               a.click();
               document.body.removeChild(a);
-              _this.osdSelection.disable();
-              _this.hud.clippingState.ondisplayOff();
+              // _this.osdSelection.disable();
+              // _this.hud.clippingState.ondisplayOff();
             }
           }
         });
