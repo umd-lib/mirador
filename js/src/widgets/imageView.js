@@ -670,6 +670,12 @@
             _this.setBounds();
           }, 500));
         });
+        // Loading a new image requires re-enabling of the clipper until after the async
+        // call to loading the images as well as the associated handlers is completed
+      }).done(function() {
+        if (_this.hud.clippingState.current === 'clippingOn') {
+        _this.osdSelection.enable();
+        }
       });
     },
 
