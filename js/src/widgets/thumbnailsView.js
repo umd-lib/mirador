@@ -137,11 +137,17 @@
 
     loadImages: function() {
       var _this = this;
+      var delayTimes = this.state.getStateProperty('delayTimes');
+      var mainImageDelay = parseInt(delay == undefined? 1000 : delayTimes.mainImage);
+      var thumbnailDelay = parseInt(delay == undefined? 250 : delayTimes.thumbnails);
       jQuery.each(_this.element.find("img"), function(key, value) {
-        if ($.isOnScreen(value, _this.lazyLoadingFactor) && !jQuery(value).attr("src")) {
-          var url = jQuery(value).attr("data");
-          _this.loadImage(value, url);
-        }
+        setTimeout( function(){
+          if ($.isOnScreen(value, _this.lazyLoadingFactor) && !jQuery(value).attr("src")) {
+            var url = jQuery(value).attr("data");
+            _this.loadImage(value, url);
+          }
+        }, mainImageDelay);
+        mainImageDelay += thumbnailDelay;
       });
     },
 
