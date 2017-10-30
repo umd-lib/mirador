@@ -17,7 +17,9 @@
       windowId:             null,
       panel:                false,
       lazyLoadingFactor:    1.5,  //should be >= 1
-      eventEmitter:         null
+      eventEmitter:         null,
+      parsedImageElements:  false,
+      imagesToLoadList:     []
     }, options);
 
     this.init();
@@ -149,20 +151,33 @@
 
     loadImages: function() {
       var _this = this;
-      jQuery.each(_this.element.find("img"), function(key, value) {
-        if ($.isOnScreen(value, _this.lazyLoadingFactor) && !jQuery(value).attr("src")) {
-          var url = jQuery(value).attr("data");
-          _this.loadImage(value, url);
-        }
-      });
+      if (!_this.parsedImageElements) {
+        jQuery.each(_this.element.find("img"), function(key, value) {
+          if ($.isOnScreen(value, _this.lazyLoadingFactor) && !jQuery(value).attr("src")) {
+            var url = jQuery(value).attr("data");
+            _this.imagesToLoadList.push({"value": value, "url": url});
+          }
+        });
+        _this.imagesToLoadList.reverse();
+        _this.parsedImageElements = true;
+      }
+
+      if(_this.imagesToLoadList.length) {
+        var top = _this.imagesToLoadList.pop();
+        _this.loadImage(top.value, top.url);
+      } else {
+        _this.parsedImageElements = false;
+      }
     },
 
     loadImage: function(imageElement, url) {
-      var _this = this,
+      var _this = this;
       imagePromise = $.createImagePromise(url);
 
       imagePromise.done(function(image) {
-        jQuery(imageElement).attr('src', image);
+        jQuery(imageElement).load(function() {
+          _this.loadImages();
+        }).attr('src', image);
       });
     },
 
@@ -241,7 +256,5 @@
     }
 
   };
-
-
 
 }(Mirador));
