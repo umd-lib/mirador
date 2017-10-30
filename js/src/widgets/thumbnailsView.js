@@ -150,12 +150,7 @@
         _this.parsedImageElements = true;
       }
 
-      if(_this.imagesToLoadList.length) {
-        var top = _this.imagesToLoadList.pop();
-        _this.loadImage(top.value, top.url);
-      } else {
-        _this.parsedImageElements = false;
-      }
+      _this.loadNextImage();
     },
 
     loadImage: function(imageElement, url) {
@@ -164,9 +159,19 @@
 
       imagePromise.done(function(image) {
         jQuery(imageElement).load(function() {
-          _this.loadImages();
+          _this.loadNextImage();
         }).attr('src', image);
       });
+    },
+
+    loadNextImage: function() {
+      var _this = this;
+      if(_this.imagesToLoadList.length) {
+        var top = _this.imagesToLoadList.pop();
+        _this.loadImage(top.value, top.url);
+      } else {
+        _this.parsedImageElements = false;
+      }
     },
 
     reloadImages: function(newThumbHeight, triggerShow) {
