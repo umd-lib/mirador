@@ -165,7 +165,12 @@
         'layout' : true,
         'options' : false,
         'fullScreenViewer': true
-      }
+      },
+      "userButtons": [{
+         "label": "Download",
+         "iconClass": "fa fa-download",
+         "attributes": { "id": "downloadImage", "href": "#", "download":"image.jpg" }
+      }]
       //'height': 25,
       //'width': '100%'
     },
