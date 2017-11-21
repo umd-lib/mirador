@@ -741,7 +741,7 @@
       _this.osdSelection = _this.osd.selection({
         // startRotated: false,
         showSelectionControl: false,
-        prefixUrl: './build/mirador/images/',
+        prefixUrl: _this.state.getStateProperty('buildPath') + 'images/',
         keyboardShortcut: false,
         onSelection: function(rect) {
 
