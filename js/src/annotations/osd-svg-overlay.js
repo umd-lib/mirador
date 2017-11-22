@@ -877,6 +877,7 @@
       var strokeColor = this.strokeColor;
       var fillColor = this.fillColor;
       var fillColorAlpha = this.fillColorAlpha || FILL_COLOR_ALPHA_WORKAROUND;
+      var annotationTypeStyles = this.state.getStateProperty('drawingToolsSettings').annotationTypeStyles;
       this.strokeColor = this.state.getStateProperty('drawingToolsSettings').strokeColor;
       this.fillColor = this.state.getStateProperty('drawingToolsSettings').fillColor;
       this.fillColorAlpha = this.state.getStateProperty('drawingToolsSettings').fillColorAlpha || FILL_COLOR_ALPHA_WORKAROUND;
