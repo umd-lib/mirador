@@ -21,12 +21,14 @@
       this.svgOverlay.show();
       this.svgOverlay.disable();
 
+      this.horizontallyFlipped = false;
+
       this.listenForActions();
     },
 
     enterDisplayAnnotations: function() {
       this.svgOverlay.setMouseTool();
-      
+
       // if a user selected the pointer mode but is still actively
       // working on an annotation, don't re-render
       if (!this.svgOverlay.inEditOrCreateMode) {
@@ -85,7 +87,6 @@
     },
 
     render: function () {
-
       if(this.parent.mode !== $.AnnotationsLayer.DISPLAY_ANNOTATIONS){
         return ;
       }
@@ -94,27 +95,24 @@
       this.svgOverlay.paperScope.project.clear();
       var _this = this;
       _this.annotationsToShapesMap = {};
+      var strategies = [
+        new $.Mirador21Strategy(),
+        new $.LegacyOpenAnnotationStrategy(),
+        new $.MiradorLegacyStrategy(),
+        new $.MiradorDualStrategy()
+      ];
 
       for (var i = 0; i < this.list.length; i++) {
-        var shapeArray;
         var annotation = this.list[i];
-        if (annotation.on && typeof annotation.on === 'object') {
-          if (!annotation.on.selector) {
-            continue;
-          } else if (annotation.on.selector.value.indexOf('<svg') !== -1) {
-            shapeArray = _this.svgOverlay.parseSVG(annotation.on.selector.value, annotation);
-          } else if (annotation.on.selector.value.indexOf('xywh=') !== -1) {
-            shapeArray = _this.parseRectangle(annotation.on.selector.value, annotation);
-          } else {
-           continue;
+        try {
+          var shapeArray = this.prepareShapeArray(annotation, strategies);
+          if (shapeArray.length > 0) {
+            _this.svgOverlay.restoreLastView(shapeArray);
+            _this.annotationsToShapesMap[annotation['@id']] = shapeArray;
           }
-        } else if (annotation.on && typeof annotation.on === 'string' && annotation.on.indexOf('xywh=') !== -1) {
-          shapeArray = _this.parseRectangle(annotation.on, annotation);
-        } else {
-          continue;
+        } catch(e) {
+          console.log('ERROR OsdRegionDrawTool#render anno:', annotation, 'error:', e);
         }
-        _this.svgOverlay.restoreLastView(shapeArray);
-        _this.annotationsToShapesMap[annotation['@id']] = shapeArray;
       }
 
       var windowElement = _this.state.getWindowElement(_this.windowId);
@@ -133,6 +131,18 @@
       _this.eventEmitter.publish('annotationsRendered.' + _this.windowId);
     },
 
+    prepareShapeArray: function(annotation, strategies) {
+      if (typeof annotation === 'object' && annotation.on) {
+        for (var i = 0; i < strategies.length; i++) {
+          if (strategies[i].isThisType(annotation)) {
+            shapeArray = strategies[i].parseRegion(annotation, this);
+            return shapeArray;
+          }
+        }
+      }
+      return [];
+    },
+
     parseRectangle: function(rectString, annotation) {
       var shapeArray = rectString.split('=')[1].split(','),
       shape = {
@@ -147,6 +157,9 @@
 
     showTooltipsFromMousePosition: function(event, location, absoluteLocation) {
       var _this = this;
+      var originWindow = this.state.getWindowObjectById(this.windowId);
+      var currentCanvasModel = originWindow.canvases[originWindow.canvasID];
+
       var hitOptions = {
         fill: true,
         stroke: true,
@@ -157,23 +170,40 @@
       var hoverFillColorAlpha = this.state.getStateProperty('drawingToolsSettings').hoverFillColorAlpha;
       var annotationTypeStyles = this.state.getStateProperty('drawingToolsSettings').annotationTypeStyles;
       var annotations = [];
+      if (this.horizontallyFlipped) {
+        location.x = currentCanvasModel.getBounds().width - location.x;
+      }
       for (var key in _this.annotationsToShapesMap) {
         if (_this.annotationsToShapesMap.hasOwnProperty(key)) {
           var shapeArray = _this.annotationsToShapesMap[key];
           for (var idx = 0; idx < shapeArray.length; idx++) {
             var shapeTool = this.svgOverlay.getTool(shapeArray[idx]);
+            var hoverWidth = shapeArray[idx].data.strokeWidth / this.svgOverlay.paperScope.view.zoom;
+            var notShowTooltip = false;
             var annoStyle = {
               'hoverColor': hoverColor,
               'hoverFillColor': hoverFillColor,
               'hoverFillColorAlpha': hoverFillColorAlpha
             };
-            var hideTooltip = false;
+
             if (shapeArray[idx].hitTest(location, hitOptions)) {
-              if(shapeTool.onHover && !shapeArray[idx].data.hovered){              
-                for (var styleKey in annotationTypeStyles) {
-                  if (annotationTypeStyles.hasOwnProperty(styleKey) && shapeArray[idx].data.annotation['@type'].includes(styleKey)) {
-                    if (typeof annotationTypeStyles[styleKey].hoverColor !== 'undefined') {
-                      annoStyle.hoverColor = annotationTypeStyles[styleKey].hoverColor;
+              annotations.push(shapeArray[idx].data.annotation);
+              if(shapeTool.onHover){
+                for(var k=0;k<shapeArray.length;k++){
+                  for (var styleKey in annotationTypeStyles) {
+                    if (annotationTypeStyles.hasOwnProperty(styleKey) && shapeArray[idx].data.annotation['@type'].includes(styleKey)) {
+                      if (shapeArray[k].data.annotation['@type'].includes(styleKey)) {
+                        if (typeof annotationTypeStyles[styleKey].hoverColor !== 'undefined') {
+                          annoStyle.hoverColor = annotationTypeStyles[styleKey].hoverColor;
+                        }
+                        if (typeof annotationTypeStyles[styleKey].hoverFillColor !== 'undefined') {
+                          annoStyle.hoverFillColor = annotationTypeStyles[styleKey].hoverFillColor;
+                        }
+                        if (typeof annotationTypeStyles[styleKey].hoverFillColorAlpha !== 'undefined') {
+                          annoStyle.hoverFillColorAlpha = annotationTypeStyles[styleKey].hoverFillColorAlpha;
+                        }
+                        break;
+                      }
                     }
                     if (typeof annotationTypeStyles[styleKey].hoverFillColor !== 'undefined') {
                       annoStyle.hoverFillColor = annotationTypeStyles[styleKey].hoverFillColor;
@@ -181,19 +211,22 @@
                     if (typeof annotationTypeStyles[styleKey].hoverFillColorAlpha !== 'undefined') {
                       annoStyle.hoverFillColorAlpha = annotationTypeStyles[styleKey].hoverFillColorAlpha;
                     }
-                    if (typeof annotationTypeStyles[styleKey].hideTooltip !== 'undefined' && annotationTypeStyles[styleKey].hideTooltip) {
-                      hideTooltip = true;
+                    if (typeof annotationTypeStyles[styleKey].notShowTooltip !== 'undefined' && annotationTypeStyles[styleKey].notShowTooltip) {
+                      notShowTooltip = true;
                     }
                     break;
                   }
                 }
                 shapeTool.onHover(true,shapeArray[idx],annoStyle.hoverColor,annoStyle.hoverFillColor,annoStyle.hoverFillColorAlpha);
-                if (!hideTooltip) {
+                if (!notShowTooltip) {
                   annotations.push(shapeArray[idx].data.annotation);
                 }
               }
-            } else {
-              shapeTool.onHover(false,shapeArray[idx]);
+              break;
+            }else{
+              if(shapeTool.onHover){
+                shapeTool.onHover(false,shapeArray[idx],hoverWidth);
+              }
             }
           }
         }
@@ -273,18 +306,15 @@
               _this.eventEmitter.publish('SET_OVERLAY_TOOLTIP.' + _this.windowId, {"tooltip" : null, "visible" : false, "paths" : []});
             }
             jQuery.each(paths, function(index, path) {
-              //just in case, force the shape to be non hovered
-              var tool = _this.svgOverlay.getTool(path);
-              tool.onHover(false, path);
-
               path.data.editable = options.isEditable;
               if (options.isEditable) {
-                path.data.currentStrokeValue = path.data.editStrokeValue;
-                path.strokeWidth = path.data.currentStrokeValue / _this.svgOverlay.paperScope.view.zoom;
+                path.strokeWidth = (path.data.strokeWidth + 5) / _this.svgOverlay.paperScope.view.zoom;
               } else {
-                path.data.currentStrokeValue = path.data.defaultStrokeValue;
-                path.strokeWidth = path.data.currentStrokeValue / _this.svgOverlay.paperScope.view.zoom;
+                path.strokeWidth = path.data.strokeWidth / _this.svgOverlay.paperScope.view.zoom;
               }
+              //just in case, force the shape to be non hovered
+              var tool = _this.svgOverlay.getTool(path);
+              tool.onHover(false, path, path.strokeWidth);
             });
           } else {
             jQuery.each(paths, function(index, path) {
@@ -297,6 +327,17 @@
 
       this.eventsSubscriptions.push(_this.eventEmitter.subscribe('refreshOverlay.' + _this.windowId, function (event) {
         _this.render();
+      }));
+
+      this.eventsSubscriptions.push(this.eventEmitter.subscribe("enableManipulation",function(event, tool){
+        if(tool === 'mirror') {
+          _this.horizontallyFlipped = true;
+        }
+      }));
+      this.eventsSubscriptions.push(this.eventEmitter.subscribe("disableManipulation",function(event, tool){
+        if(tool === 'mirror') {
+          _this.horizontallyFlipped = false;
+        }
       }));
     },
 

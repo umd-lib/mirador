@@ -16,18 +16,15 @@
 
     createShape: function(initialPoint, overlay) {
       overlay.mode = 'create';
-      var pixel = 1 / overlay.paperScope.view.zoom;
-      var segments = this._createSegments(initialPoint,pixel,overlay);
+      var segments = this._createSegments(initialPoint, overlay);
       var shape = new overlay.paperScope.Path({
         segments: segments,
         fullySelected: true,
         name: overlay.getName(this)
       });
       shape.dashArray = overlay.dashArray;
-      shape.data.defaultStrokeValue = 1;
-      shape.data.editStrokeValue = 5;
-      shape.data.currentStrokeValue = shape.data.defaultStrokeValue;
-      shape.strokeWidth = shape.data.currentStrokeValue / overlay.paperScope.view.zoom;
+      shape.data.strokeWidth = overlay.strokeWidth;
+      shape.strokeWidth = shape.data.strokeWidth / overlay.paperScope.view.zoom;
       shape.strokeColor = overlay.strokeColor;
       shape.fillColor = overlay.fillColor;
       shape.fillColor.alpha = overlay.fillColorAlpha;
@@ -38,7 +35,7 @@
       return shape;
     },
 
-    _createSegments:function(initialPoint,pixel, overlay){
+    _createSegments:function(initialPoint, overlay){
       var segments = [];
       // point indexes
       // 0    1&2    3
@@ -47,16 +44,16 @@
       //   └ ─ ─ ─ ┘
       // 7     6     5(initial point)
       // points 1 & 2 are workaround used to draw rotation handle
-
-      segments.push(new overlay.paperScope.Point(initialPoint.x - 2 * pixel, initialPoint.y - 2 * pixel));
-      segments.push(new overlay.paperScope.Point(initialPoint.x - 1 * pixel, initialPoint.y - 2 * pixel));
-      segments.push(new overlay.paperScope.Point(initialPoint.x - 1 * pixel, initialPoint.y - 2 * pixel));
-      segments.push(new overlay.paperScope.Point(initialPoint.x, initialPoint.y - 2 * pixel));
-      segments.push(new overlay.paperScope.Point(initialPoint.x, initialPoint.y - 1 * pixel));
+      segments.push(new overlay.paperScope.Point(initialPoint.x - 2, initialPoint.y - 2));
+      segments.push(new overlay.paperScope.Point(initialPoint.x - 1, initialPoint.y - 2));
+      segments.push(new overlay.paperScope.Point(initialPoint.x - 1, initialPoint.y - 2));
+      segments.push(new overlay.paperScope.Point(initialPoint.x, initialPoint.y - 2));
+      segments.push(new overlay.paperScope.Point(initialPoint.x, initialPoint.y - 1));
       segments.push(new overlay.paperScope.Point(initialPoint.x, initialPoint.y));
-      segments.push(new overlay.paperScope.Point(initialPoint.x - 1 * pixel, initialPoint.y));
-      segments.push(new overlay.paperScope.Point(initialPoint.x - 2 * pixel, initialPoint.y));
-      segments.push(new overlay.paperScope.Point(initialPoint.x - 2 * pixel, initialPoint.y - 1 * pixel));
+      segments.push(new overlay.paperScope.Point(initialPoint.x - 1, initialPoint.y));
+      segments.push(new overlay.paperScope.Point(initialPoint.x - 2, initialPoint.y));
+      segments.push(new overlay.paperScope.Point(initialPoint.x - 2, initialPoint.y - 1));
+
       return segments;
     },
 
@@ -158,16 +155,10 @@
     onHover: function(activate, shape, hoverColor, hoverFillColor, hoverFillColorAlpha){
       // shape needs to have hovered styles
       if(activate && !shape.data.hovered){
-        if (typeof umdMiradorOCR !== 'undefined' &&
-            umdMiradorOCR &&
-            typeof shape.data.annotation !== 'undefined' &&
-            typeof shape.data.annotation.resource[0].chars !== 'undefined' &&
-            shape.data.annotation.resource[0].chars !== '' &&
-            typeof umdMiradorOCRHovered !== 'undefined' &&
-            typeof umdMiradorOCRText !== 'undefined'){
-          umdMiradorOCRHovered += 1;
-          umdMiradorOCRText = shape.data.annotation.resource[0].chars;
+        if (shape.data.annotation) {
+          umdMiradorOCRHovered = true;
           jQuery('div.openseadragon-canvas').css('cursor', 'pointer');
+          umdMiradorOCRText = shape.data.annotation.resource[0].chars;
         }
         shape.data.nonHoverStroke = shape.strokeColor.clone();
         shape.data.nonHoverFill = shape.fillColor.clone();
@@ -178,14 +169,8 @@
       }
       // shape is not longer hovered
       if(!activate && shape.data.hovered){
-        if (typeof umdMiradorOCRHovered !== 'undefined' &&
-            umdMiradorOCR &&
-            umdMiradorOCRHovered >= 1){
-          umdMiradorOCRHovered -= 1;
-          if (umdMiradorOCRHovered === 0) {
-            jQuery('div.openseadragon-canvas').css('cursor', 'default');
-          }
-        }
+        umdMiradorOCRHovered = false;
+        jQuery('div.openseadragon-canvas').css('cursor', 'default');
         shape.strokeColor = shape.data.nonHoverStroke.clone();
         shape.fillColor = shape.data.nonHoverFill.clone();
         delete shape.data.nonHoverStroke;

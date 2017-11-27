@@ -265,7 +265,7 @@
       });
     },
 
-    template: Handlebars.compile([
+    template: $.Handlebars.compile([
                                  '<div class="mirador-hud">',
                                  '{{#if showNextPrev}}',
                                  '<a class="mirador-osd-previous hud-control ">',

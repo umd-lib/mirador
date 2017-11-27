@@ -135,7 +135,7 @@ describe('Rectangle', function() {
       expect(this.shape.data.nonHoverFill.blue).toBe(oldFillColor.blue);
       expect(this.shape.data.nonHoverFill.alpha).toBe(oldFillColor.alpha);
 
-      this.rectangle.onHover(false,this.shape);
+      this.rectangle.onHover(false,this.shape,1);
       expect(this.shape.data.hovered).toBe(undefined);
       expect(this.shape.strokeColor.red).toBe(oldColor.red);
       expect(this.shape.strokeColor.green).toBe(oldColor.green);
@@ -612,5 +612,5 @@ describe('Rectangle', function() {
     });
 
   });
-  
+
 });

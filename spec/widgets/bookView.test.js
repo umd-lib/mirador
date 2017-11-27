@@ -16,13 +16,10 @@ describe('BookView', function() {
   );
   beforeEach(function() {
     jasmine.getJSONFixtures().fixturesPath = 'spec/fixtures';
-    // WARNING: Need to stub to stop OpenSeadragon from crashing PhantomJS
-    // If you can make this not happen, remove this line and test the method
-    spyOn(Mirador.BookView.prototype, 'createOpenSeadragonInstance');
     this.viewContainer = document.createElement('div', {
       class: 'view-container'
     });
-    this.fixture = getJSONFixture('BNF-condorcet-florus-dispersus-manifest.json');
+    this.fixture = getJSONFixture('Richardson7manifest.json');
     this.manifest = new Mirador.Manifest(
       this.fixture['@id'], 'IIIF', this.fixture
     );
@@ -44,7 +41,7 @@ describe('BookView', function() {
       imagesList: this.imagesList,
       state: this.state,
       bottomPanelAvailable: true,
-      annoEndpointAvailable: false,
+      annoEndpointAvailable: true,
       canvasControls: this.canvasControls,
       annotationState: this.canvasControls.annotations.annotationState
     });
@@ -55,9 +52,61 @@ describe('BookView', function() {
     delete this.bookView;
   });
 
-  xdescribe('Initialization', function() {
+  describe('Initialization', function() {
     it('should initialize', function() {
-
+      expect(true).toBe(true); //Force beforeEach() to run
+    });
+    it('should initialize with a specified canvas ID', function() {
+      this.bookView = new Mirador.BookView({
+        manifest: this.manifest,
+        appendTo: this.appendTo,
+        windowId: this.windowId,
+        eventEmitter: this.eventEmitter,
+        imagesList: this.imagesList,
+        state: this.state,
+        bottomPanelAvailable: true,
+        annoEndpointAvailable: true,
+        canvasControls: this.canvasControls,
+        annotationState: this.canvasControls.annotations.annotationState,
+        canvasID: this.imagesList[2]['@id']
+      });
+      subject = this.bookView;
+      expect(subject.currentImgIndex).toEqual(2);
+    });
+    it('should initialize with null osdOptions', function() {
+      this.bookView = new Mirador.BookView({
+        manifest: this.manifest,
+        appendTo: this.appendTo,
+        windowId: this.windowId,
+        eventEmitter: this.eventEmitter,
+        imagesList: this.imagesList,
+        state: this.state,
+        bottomPanelAvailable: true,
+        annoEndpointAvailable: true,
+        canvasControls: this.canvasControls,
+        annotationState: this.canvasControls.annotations.annotationState,
+        canvasID: this.imagesList[2]['@id'],
+        osdOptions: null
+      });
+      subject = this.bookView;
+      expect(subject.currentImgIndex).toEqual(2);
+    });
+    it('should initialize with bottom panel disabled', function() {
+      spyOn(this.eventEmitter, 'publish');
+      this.bookView = new Mirador.BookView({
+        manifest: this.manifest,
+        appendTo: this.appendTo,
+        windowId: this.windowId,
+        eventEmitter: this.eventEmitter,
+        imagesList: this.imagesList,
+        state: this.state,
+        bottomPanelAvailable: false,
+        annoEndpointAvailable: false,
+        canvasControls: this.canvasControls,
+        annotationState: this.canvasControls.annotations.annotationState
+      });
+      subject = this.bookView;
+      expect(this.eventEmitter.publish).toHaveBeenCalledWith('SET_BOTTOM_PANEL_VISIBILITY.' + this.windowId, false);
     });
   });
 
@@ -493,6 +542,35 @@ describe('BookView', function() {
       it('stitches bottom-up', function() {
         subject.viewingDirection = 'bottom-to-top';
         expect(subject.getStitchList()).toEqual([this.imagesList[5], this.imagesList[4]]);
+      });
+    });
+
+    describe('Order of imagesList', function() {
+      it('should be reversed for r-t-l sequences and manifests', function() {
+
+        this.fixture.viewingDirection = "right-to-left";
+        var manifest = new Mirador.Manifest(
+          this.fixture['@id'], 'IIIF', this.fixture
+        ),
+            imagesList = manifest.getCanvases(),
+            imagesListLtr = imagesList.concat(),
+            imagesListRtl = imagesList.concat();
+        imagesListRtl.reverse();
+        var bookView = new Mirador.BookView({
+          manifest: manifest,
+          appendTo: this.appendTo,
+          windowId: this.windowId,
+          eventEmitter: this.eventEmitter,
+          imagesList: imagesList,
+          imagesListLtr: imagesListLtr,
+          imagesListRtl: imagesListRtl,
+          state: this.state,
+          bottomPanelAvailable: true,
+          annoEndpointAvailable: true,
+          canvasControls: this.canvasControls,
+          annotationState: this.canvasControls.annotations.annotationState
+        });
+        expect(imagesList[imagesList.length - 1]).toBe(bookView.imagesListRtl[0]);
       });
     });
     // TODO: Fill this in once implemented

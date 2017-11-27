@@ -6,10 +6,10 @@
       appendTo:          null,
       manifest:          null,
       panelState:        {},
-      tocTabAvailable:   false,
+      tocTabAvailable:   null,
       annotationsTabAvailable: false,
       layersTabAvailable: false,
-      toolsTabAvailable: false,
+      searchTabAvailable: null,
       hasStructures:     false,
       state:             null,
       eventEmitter:      null
@@ -28,34 +28,34 @@
             name : 'toc',
             options : {
               available: _this.tocTabAvailable,
-              id:'tocTab', 
-              label:'Index'
+              id:'tocTab',
+              label: i18next.t('tabTitleIndex')
             }
           },
           /*{
            name : 'annotations',
            options : {
            available: _this.annotationsTabAvailable,
-           id:'annotationsTab', 
+           id:'annotationsTab',
            label:'Annotations'
            }
            },*/
           {
+            name : 'search',
+            options : {
+              available: _this.searchTabAvailable,
+              id: 'searchTab',
+              label: i18next.t('tabTitleSearch')
+            }
+          },
+          {
             name : 'layers',
             options : {
               available: _this.layersTabAvailable,
-              id:'layersTab', 
-              label:'Layers'
+              id:'layersTab',
+              label: i18next.t('tabTitleLayers')
             }
           },
-          /*{
-           name : 'tools',
-           options : {
-           available: _this.toolsTabAvailable,
-           id:'toolsTab', 
-           label:'Tools'
-           }
-           }*/
         ],
         width: 280,
         open: true
@@ -97,12 +97,23 @@
           eventEmitter: _this.eventEmitter
         });
       }
-      if (_this.layersTabAvailable) {
-        new $.LayersTab({
+      if (_this.searchTabAvailable) {
+        new $.SearchTab({
           manifest: _this.manifest,
           windowId: this.windowId,
           appendTo: _this.element.find('.tabContentArea'),
-          canvasID: this.canvasID,
+          state: _this.state,
+          manifestVersion: this.manifest.getVersion(),
+          eventEmitter: _this.eventEmitter
+        });
+      }
+      if (_this.layersTabAvailable) {
+        new $.LayersTab({
+          manifest: _this.manifest,
+          windowId: _this.windowId,
+          appendTo: _this.element.find('.tabContentArea'),
+          canvasID: _this.canvasID,
+          canvases: _this.canvases,
           state: _this.state,
           eventEmitter: _this.eventEmitter
         });
@@ -194,7 +205,7 @@
       }
     },
 
-    template: Handlebars.compile([
+    template: $.Handlebars.compile([
       '<div class="tabContentArea">',
       '<ul class="tabGroup">',
       '</ul>',
@@ -206,11 +217,11 @@
       if (!enableSidePanel) {
         jQuery(this.appendTo).hide();
         _this.eventEmitter.publish('ADD_CLASS.'+this.windowId, 'focus-max-width');
-        _this.eventEmitter.publish('HIDE_ICON_TOC.'+this.windowId);                
+        _this.eventEmitter.publish('HIDE_ICON_TOC.'+this.windowId);
       } else {
         jQuery(this.appendTo).show({effect: "fade", duration: 300, easing: "easeInCubic"});
         _this.eventEmitter.publish('REMOVE_CLASS.'+this.windowId, 'focus-max-width');
-        _this.eventEmitter.publish('SHOW_ICON_TOC.'+this.windowId);                
+        _this.eventEmitter.publish('SHOW_ICON_TOC.'+this.windowId);
       }
     }
   };

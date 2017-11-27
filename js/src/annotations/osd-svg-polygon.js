@@ -23,10 +23,8 @@
         strokeColor: overlay.strokeColor,
         name: overlay.getName(_this)
       });
-      shape.data.defaultStrokeValue = 1;
-      shape.data.editStrokeValue = 5;
-      shape.data.currentStrokeValue = shape.data.defaultStrokeValue;
-      shape.strokeWidth = shape.data.currentStrokeValue / overlay.paperScope.view.zoom;
+      shape.data.strokeWidth = overlay.strokeWidth;
+      shape.strokeWidth = shape.data.strokeWidth / overlay.paperScope.view.zoom;
       return shape;
     },
 
@@ -112,14 +110,14 @@
     onHover:function(activate,shape,hoverColor,hoverFillColor,hoverFillColorAlpha){
       // shape needs to have hovered styles
       if(activate && !shape.data.hovered){
-        shape.data.nonHoverStroke = shape.strokeColor.clone();
+        shape.data.nonHoverStrokeColor = shape.strokeColor.clone();
         shape.data.hovered = true;
         shape.strokeColor = hoverColor;
       }
       // shape is not longer hovered
       if(!activate && shape.data.hovered){
-        shape.strokeColor = shape.data.nonHoverStroke.clone();
-        delete shape.data.nonHoverStroke;
+        shape.strokeColor = shape.data.nonHoverStrokeColor.clone();
+        delete shape.data.nonHoverStrokeColor;
         delete shape.data.hovered;
       }
     },
