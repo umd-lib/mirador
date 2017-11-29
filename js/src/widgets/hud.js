@@ -335,7 +335,7 @@
                                   '</a>',
                                   '</div>',
                                   '<div class="mirador-download-control">',
-                                  '<a class="mirador-download-button hud-control" role="button" title="{{t "downloadButton"}}" aria-label="{{t "downloadButton"}}" download="image">',
+                                  '<a class="mirador-download-button hud-control" role="button" title="{{t "downloadButton"}}" aria-label="{{t "downloadButton"}}" download="image" target="_blank">',
                                   '<i class="material-icons">file_download</i>',
                                   '</a>',
                                   '</div>',
