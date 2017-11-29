@@ -805,6 +805,7 @@
       }
       this.canvasID = canvasID;
       if (this.focusModules.ScrollView === null) {
+        var containerHeight = this.element.find('.view-container').height();
         this.focusModules.ScrollView = new $.ScrollView({
           manifest: this.manifest,
           appendTo: this.element.find('.view-container'),
