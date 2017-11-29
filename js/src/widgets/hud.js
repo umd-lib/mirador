@@ -7,7 +7,8 @@
       windowId:  null,
       annoState: null,
       annoEndpointAvailable: false,
-      eventEmitter: null
+      eventEmitter: null,
+      miradorInstanceName: null
     }, options);
 
     this.init();
@@ -16,6 +17,8 @@
   $.Hud.prototype = {
 
     init: function() {
+      this.events = [];
+      this.getMiradorInstanceName();
       this.createStateMachines();
 
       var showAnno = typeof this.showAnno !== 'undefined' ? this.showAnno : this.canvasControls.annotations.annotationLayer,
@@ -76,10 +79,48 @@
           _this.annoState.displayOff();
         }
       });
+
+      this.events.push(this.eventEmitter.subscribe('UPDATE_FOCUS_IMAGES.' + this.windowId, function(event, images) {
+        jQuery(document).ready(function(){
+          if (window[_this.miradorInstanceName].viewer.workspace.windows.length) {
+            _this.setDownloadButton(images.array[0]);
+          }
+        });
+      }));
     },
 
     bindEvents: function() {
       var _this = this;
+
+      this.element.find('.mirador-download-button').on('click', function() {
+        if (!this.href) {
+          _this.setDownloadButton(window[_this.miradorInstanceName].viewer.workspace.windows[0].canvasID);
+        }
+      });
+    },
+
+    getMiradorInstanceName: function (){
+      var _this = this;
+      jQuery.each(window, function(key, value) {
+        if (value instanceof Mirador) {
+          _this.miradorInstanceName = key;
+        }
+      });
+    },
+
+    setDownloadButton: function (uri){
+      var _this = this;
+      var canvases = window[_this.miradorInstanceName].viewer.workspace.windows[0].manifest.jsonLd.sequences[0].canvases;
+      var downloadButton = window[_this.miradorInstanceName].viewer.element.find(".mirador-download-button")[0];
+      var appendToUri = "/full/full/0/default.jpg";
+      var regEx = /\/.+\/.+\/.+\/\w+.jpg/;
+      jQuery.each(canvases, function(key, value) {
+        if (value['@id'] === uri) {
+          regEx.test(value.images[0].resource['@id'])?
+            downloadButton.setAttribute("href", value.images[0].resource['@id']) :
+              downloadButton.setAttribute("href", value.images[0].resource['@id'] + appendToUri);
+        }
+      });
     },
 
     createStateMachines: function() {
@@ -291,6 +332,11 @@
                                   '<div class="mirador-clipping-control">',
                                   '<a class="mirador-clipping-toggle hud-control" role="button" title="{{t "imageClippingTooltip"}}" aria-label="{{t "imageClippingTooltip"}}">',
                                   '<i class="material-icons">crop</i>',
+                                  '</a>',
+                                  '</div>',
+                                  '<div class="mirador-download-control">',
+                                  '<a class="mirador-download-button hud-control" role="button" title="{{t "downloadButton"}}" aria-label="{{t "downloadButton"}}" download="image">',
+                                  '<i class="material-icons">file_download</i>',
                                   '</a>',
                                   '</div>',
                                  '{{/if}}',
