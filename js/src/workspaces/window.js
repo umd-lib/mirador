@@ -71,8 +71,6 @@
 
       this.events = [];
 
-      _this.getMiradorInstanceName();
-
       //make sure annotations list is cleared out when changing objects within window
       while(_this.annotationsList.length > 0) {
         _this.annotationsList.pop();
@@ -433,38 +431,6 @@
       _this.events.push(_this.eventEmitter.subscribe('ENABLE_WINDOW_FULLSCREEN', function(event) {
         _this.element.find('.mirador-osd-fullscreen').show();
       }));
-
-      _this.events.push(_this.eventEmitter.subscribe('UPDATE_FOCUS_IMAGES.' + _this.id, function(event, images) {
-        jQuery(document).ready(function(){
-          if (window[_this.miradorInstanceName].viewer.workspace.windows.length) {
-            _this.setDownloadButton(images.array[0]);
-          }
-        });
-      }));
-    },
-
-    getMiradorInstanceName: function (){
-      var _this = this;
-      jQuery.each(window, function(key, value) {
-        if (value instanceof Mirador) {
-          _this.miradorInstanceName = key;
-        }
-      });
-    },
-
-    setDownloadButton: function (uri){
-      var _this = this;
-      var canvases = window[_this.miradorInstanceName].viewer.workspace.windows[0].manifest.jsonLd.sequences[0].canvases;
-      var downloadButton = window[_this.miradorInstanceName].viewer.element.find("#downloadImage")[0];
-      var appendToUri = "/full/full/0/default.jpg";
-      var regEx = /\/.+\/.+\/.+\/\w+.jpg/;
-      jQuery.each(canvases, function(key, value) {
-        if (value['@id'] === uri) {
-          regEx.test(value.images[0].resource['@id'])?
-            downloadButton.setAttribute("href", value.images[0].resource['@id']) :
-              downloadButton.setAttribute("href", value.images[0].resource['@id'] + appendToUri);
-        }
-      });
     },
 
     bindEvents: function() {
