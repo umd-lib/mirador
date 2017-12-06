@@ -14,7 +14,8 @@
       windowId:             null,
       panel:                false,
       vDirectionStatus: '',
-      lazyLoadingFactor:    1.5  //should be >= 1
+      lazyLoadingFactor:    1.5,  //should be >= 1
+      imagesToLoadList:     []
     }, options);
 
     jQuery.extend($.ScrollView.prototype, $.ThumbnailsView.prototype);
