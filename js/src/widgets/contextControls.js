@@ -85,6 +85,7 @@
       }
 
       this.setQtips(this.container.find('.mirador-clipping-control'));
+      this.setQtips(this.container.find('.mirador-download-control'));
 
       this.bindEvents();
     },
