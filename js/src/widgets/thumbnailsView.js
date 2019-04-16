@@ -9,18 +9,21 @@
       manifest:             null,
       element:              null,
       imagesList:           [],
+      imagesListLtr:           [],
+      vDirectionStatus:           '',
       appendTo:             null,
       thumbInfo:            {thumbsHeight: 150, listingCssCls: 'listing-thumbs', thumbnailCls: 'thumbnail-view'},
       defaultThumbHeight:   150,
       windowId:             null,
       panel:                false,
       lazyLoadingFactor:    1.5,  //should be >= 1
-      eventEmitter:         null
+      eventEmitter:         null,
+      parsedImageElements:  false,
+      imagesToLoadList:     []
     }, options);
 
     this.init();
   };
-
 
   $.ThumbnailsView.prototype = {
 
@@ -28,8 +31,18 @@
       if (this.canvasID !== null) {
         this.currentImgIndex = $.getImageIndexById(this.imagesList, this.canvasID);
       }
-
+      if(this.vDirectionStatus == 'rtl'){
+        this.imagesList =  this.imagesListLtr.concat();
+      }
       this.loadContent();
+      if(this.vDirectionStatus == 'rtl'){
+        var firstCanvasId = this.imagesList[0]['@id'];
+        var firstCanvasThumbSelector = 'img.thumbnail-image[data-image-id="'+firstCanvasId+'"]';
+        jQuery(this.appendTo).find('.panel-thumbnail-view').addClass('v-direction-rtl');
+        jQuery(this.appendTo).find('.thumbnail-view').find('li').each(function(){
+          jQuery(this).addClass('thumbnail-rtl');
+        });
+      }
       this.bindEvents();
       this.listenForActions();
     },
@@ -85,11 +98,12 @@
       scrollPosition,
       windowObject = this.state.getWindowObjectById(this.windowId);
 
-      if (windowObject && windowObject.viewType === 'BookView') {
-        scrollPosition = _this.element.scrollLeft() + (target.position().left + (target.next().width() + target.outerWidth())/2) - _this.element.width()/2;
-      } else {
-
-        scrollPosition = _this.element.scrollLeft() + (target.position().left + target.width()/2) - _this.element.width()/2;
+      if (target.position()) {
+        if (windowObject && windowObject.viewType === 'BookView') {
+          scrollPosition = _this.element.scrollLeft() + (target.position().left + (target.next().width() + target.outerWidth())/2) - _this.element.width()/2;
+        } else {
+          scrollPosition = _this.element.scrollLeft() + (target.position().left + target.width()/2) - _this.element.width()/2;
+        }
       }
       _this.element.scrollTo(scrollPosition, 900);
     },
@@ -128,8 +142,8 @@
     },
 
     toggle: function(stateValue) {
-      if (stateValue) { 
-        this.show(); 
+      if (stateValue) {
+        this.show();
       } else {
         this.hide();
       }
@@ -137,27 +151,39 @@
 
     loadImages: function() {
       var _this = this;
-      var delayTimes = this.state.getStateProperty('delayTimes');
-      var mainImageDelay = parseInt(delayTimes == undefined? 1000 : delayTimes.mainImage);
-      var thumbnailDelay = parseInt(delayTimes == undefined? 250 : delayTimes.thumbnails);
-      jQuery.each(_this.element.find("img"), function(key, value) {
-        setTimeout( function(){
+      if (!_this.parsedImageElements) {
+        jQuery.each(_this.element.find("img"), function(key, value) {
           if ($.isOnScreen(value, _this.lazyLoadingFactor) && !jQuery(value).attr("src")) {
             var url = jQuery(value).attr("data");
-            _this.loadImage(value, url);
+            _this.imagesToLoadList.push({"value": value, "url": url});
           }
-        }, mainImageDelay);
-        mainImageDelay += thumbnailDelay;
-      });
+        });
+        _this.imagesToLoadList.reverse();
+        _this.parsedImageElements = true;
+      }
+
+      _this.loadNextImage();
     },
 
     loadImage: function(imageElement, url) {
-      var _this = this,
+      var _this = this;
       imagePromise = $.createImagePromise(url);
 
       imagePromise.done(function(image) {
-        jQuery(imageElement).attr('src', image);
+        jQuery(imageElement).load(function() {
+          _this.loadNextImage();
+        }).attr('src', image);
       });
+    },
+
+    loadNextImage: function() {
+      var _this = this;
+      if(_this.imagesToLoadList.length) {
+        var top = _this.imagesToLoadList.pop();
+        _this.loadImage(top.value, top.url);
+      } else {
+        _this.parsedImageElements = false;
+      }
     },
 
     reloadImages: function(newThumbHeight, triggerShow) {
@@ -177,7 +203,7 @@
       }
     },
 
-    template: Handlebars.compile([
+    template: $.Handlebars.compile([
                                  '<div class="{{thumbnailCls}}">',
                                  '<ul class="{{listingCssCls}}" role="list" aria-label="Thumbnails">',
                                  '{{#thumbs}}',
@@ -235,7 +261,5 @@
     }
 
   };
-
-
 
 }(Mirador));

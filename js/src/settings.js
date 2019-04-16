@@ -52,7 +52,10 @@
       //control what is available in the side panel. if "sidePanel" is false, these options won't be applied
       "sidePanelOptions" : {
         "toc" : true,
-        "annotations" : false
+        "annotations" : false,
+        "tocTabAvailable": true,
+        "layersTabAvailable": false,
+        "searchTabAvailable": false
       },
       "sidePanelVisible" : true, //whether or not to make the side panel visible in this window on load. This setting is dependent on sidePanel being true
       "overlay" : true, //whether or not to make the metadata overlay available/visible in this window
@@ -73,7 +76,8 @@
             "contrast" : true,
             "saturate" : true,
             "grayscale" : true,
-            "invert" : true
+            "invert" : true,
+            "mirror" : false
           }
         },
         "imageClipping": true
@@ -143,7 +147,7 @@
           'hoverColor':'yellow',
           'hoverFillColor': 'yellow',
           'hoverFillColorAlpha': 0.2,
-          'hideTooltip': true
+          'notShowTooltip': true
         }
       }
     },
@@ -201,9 +205,15 @@
 
     'annotationBodyEditor': {
       'module': 'TinyMCEAnnotationBodyEditor',
-      'options': {}
+      'options': {
+        config: {
+          plugins: "image link media directionality",
+          toolbar: "bold italic | bullist numlist | link image media | removeformat | ltr rtl",
+          tags: []
+        }
+      }
     },
-
+    
     'jsonStorageEndpoint': {
       'name': 'JSONBlob API Endpoint',
       'module': 'JSONBlobAPI',

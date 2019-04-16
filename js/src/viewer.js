@@ -43,14 +43,27 @@
     init: function() {
       var _this = this;
 
-      //initialize i18next
-      i18n.init({
+      // i18next options
+      var i18nextOptions = {
         fallbackLng: 'en',
         load: 'unspecific',
         debug: false,
-        getAsync: true,
-        resGetPath: _this.state.getStateProperty('buildPath') + _this.state.getStateProperty('i18nPath')+'__lng__/__ns__.json'
-      }, _this.setupViewer.bind(_this));
+        backend: {
+          loadPath: _this.state.getStateProperty('buildPath') + _this.state.getStateProperty('i18nPath')+'{{lng}}/{{ns}}.json'
+        }
+      };
+
+      // set the language from configuration
+      var configuredLanguage = _this.state.getStateProperty('language');
+      if(configuredLanguage){
+        i18nextOptions.lng = configuredLanguage;
+      }
+
+      //initialize i18next
+      i18next.use(i18nextXHRBackend).use(i18nextBrowserLanguageDetector).init(
+        i18nextOptions,
+        _this.setupViewer.bind(_this)
+      );
       // because this is a callback, we need to bind "_this" to explicitly retain the calling context of this function (the viewer object instance));
     },
 
@@ -61,10 +74,10 @@
       this.element.css('background-color', '#333').css('background-image','url('+backgroundImage+')').css('background-position','left top')
       .css('background-repeat','repeat');
 
-      //register Handlebars helper
-      Handlebars.registerHelper('t', function(i18n_key) {
-        var result = i18n.t(i18n_key);
-        return new Handlebars.SafeString(result);
+      //register $.Handlebars helper
+      $.Handlebars.registerHelper('t', function(i18n_key) {
+        var result = i18next.t(i18n_key);
+        return new $.Handlebars.SafeString(result);
       });
 
       //check all buttons in mainMenu.  If they are all set to false, then don't show mainMenu
@@ -89,6 +102,7 @@
       // add main menu
       if (showMainMenu) {
         this.mainMenu = new $.MainMenu({ appendTo: this.element, state: this.state, eventEmitter: this.eventEmitter });
+        this.eventEmitter.publish('mainMenuInitialized');
       }
 
       // add viewer area
@@ -256,6 +270,10 @@
           jQuery.getJSON(manifest.collectionUri).done(function (data, status, jqXHR) {
             if (data.hasOwnProperty('manifests')){
               jQuery.each(data.manifests, function (ci, mfst) {
+                _this.addManifestFromUrl(mfst['@id'], '', null);
+              });
+            } else if (data.hasOwnProperty('members')){
+              jQuery.each(data.members, function (ci, mfst) {
                 _this.addManifestFromUrl(mfst['@id'], '', null);
               });
             }

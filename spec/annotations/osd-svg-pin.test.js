@@ -140,7 +140,7 @@ describe('Pin', function() {
       expect(this.shape.data.nonHoverFill.blue).toBe(oldFillColor.blue);
       expect(this.shape.data.nonHoverFill.alpha).toBe(oldFillColor.alpha);
 
-      this.pin.onHover(false,this.shape);
+      this.pin.onHover(false,this.shape,1);
       expect(this.shape.data.hovered).toBe(undefined);
       expect(this.shape.strokeColor.red).toBe(oldColor.red);
       expect(this.shape.strokeColor.green).toBe(oldColor.green);
@@ -258,6 +258,24 @@ describe('Pin', function() {
       this.pin.onMouseDown(event, overlay);
 
       expect(overlay.mode).toBe('create');
+    });
+    
+    it('should bubble onMouseDown event when the part-of prefix is found', function() {
+      var mockHitResult = {
+        item: {
+          _name: "abcdefg",
+          data: { self: { onMouseDown: jasmine.createSpy('onMouseDown') } }
+        }
+      };
+      spyOn(overlay.paperScope.project, 'hitTest').and.returnValue(mockHitResult);
+      this.pin.partOfPrefix = "cde";
+      this.pin.idPrefix = "ab";
+      var event = TestUtils.getEvent({}, {
+        x: this.initialPoint.x,
+        y: this.initialPoint.y
+      });
+      this.pin.onMouseDown(event, overlay);
+      expect(mockHitResult.item.data.self.onMouseDown).toHaveBeenCalled();
     });
 
     it('should change cursor on mouse move',function(){

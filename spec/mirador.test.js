@@ -20,7 +20,8 @@ describe('Mirador | mirador.js', function() {
         "manifestUri": "spec/data/manifest2.json",
         "location": "Stanford University",
         "title": "Walters"
-      }]
+      }],
+      language: "de"
     });
 
     testContext.mirador.viewer.eventEmitter.subscribe('manifestListItemRendered', function(data) {
@@ -44,6 +45,10 @@ describe('Mirador | mirador.js', function() {
       delete this.mirador;
     });
 
+    it('should apply the correct class to the container', function() {
+      expect(jQuery('#viewer').hasClass('mirador-container')).toBe(true);
+    });
+
     it('should render manifest list items', function() {
       console.log(this.mirador.viewer.manifestsPanel.manifestListItems.length)
       expect(this.mirador.viewer.manifestsPanel.manifestListItems.length).toBe(2);
@@ -51,6 +56,10 @@ describe('Mirador | mirador.js', function() {
 
     it('should start Mirador as blank workspace', function() {
       expect(this.mirador.viewer).toBeDefined();
+    });
+
+    it('should set the configured language', function(){
+      expect(i18next.language).toBe('de')
     });
 
     it('should select a manifest', function() {

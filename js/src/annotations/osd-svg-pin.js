@@ -29,10 +29,8 @@
       var shape = new overlay.paperScope.Path(pathData);
       shape.name = overlay.getName(_this);
       shape.dashArray = overlay.dashArray;
-      shape.data.defaultStrokeValue = 1;
-      shape.data.editStrokeValue = 5;
-      shape.data.currentStrokeValue = shape.data.defaultStrokeValue;
-      shape.strokeWidth = shape.data.currentStrokeValue / overlay.paperScope.view.zoom;
+      shape.data.strokeWidth = overlay.strokeWidth;
+      shape.strokeWidth = shape.data.strokeWidth / overlay.paperScope.view.zoom;
       shape.strokeColor = overlay.strokeColor;
       shape.fillColor = overlay.fillColor;
       shape.fillColor.alpha = overlay.fillColorAlpha;
@@ -82,7 +80,7 @@
         }
       }
     },
-    
+
     onHover:function(activate,shape,hoverColor,hoverFillColor,hoverFillColorAlpha){
       // shape needs to have hovered styles
       if(activate && !shape.data.hovered){

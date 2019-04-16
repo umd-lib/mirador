@@ -34,7 +34,7 @@
 
   $.JsonLd = {
     getTextValue: function(propertyValue, language) {
-      var languages = window.navigator.languages || ['en'];
+      var languages = i18next.languages || ['en'];
       if (typeof language === 'string') {
         languages = [language].concat(languages);
       } else if (Array.isArray(language)) {
@@ -45,7 +45,7 @@
         return '';
       }
       else if (typeof propertyValue === 'string') {
-        return propertyValue;
+        return $.sanitizeHtml(propertyValue);
       }
       else if (Array.isArray(propertyValue)) {
         var displayLanguage = getDisplayLanguage(languages, propertyValue);
@@ -62,9 +62,9 @@
           }
           text += textToAdd;
         });
-        return text;
+        return $.sanitizeHtml(text);
       } else {
-        return propertyValue['@value'];
+        return $.sanitizeHtml(propertyValue['@value']);
       }
     }
   };

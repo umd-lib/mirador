@@ -184,7 +184,7 @@
               slot = slotMap[d.id];
 
           if (slot && slot.window && !resetting) {
-            _this.eventEmitter.publish('REMOVE_WINDOW', window.id);
+            _this.eventEmitter.publish('REMOVE_WINDOW', slot.window.id);
           }
 
           // nullify the window parameter of old slots
@@ -500,6 +500,13 @@
       if (mergedConfig.hasOwnProperty('sidePanel')) {
         mergedConfig.sidePanelAvailable = mergedConfig.sidePanel;
         delete mergedConfig.sidePanel;
+      }
+
+      if (windowConfig.state.currentConfig.hasOwnProperty('sidePanelOptions')) {
+        jQuery.extend(
+          mergedConfig.sidePanelOptions,
+          windowConfig.state.currentConfig.sidePanelOptions
+        );
       }
 
       if (mergedConfig.hasOwnProperty('overlay')) {
