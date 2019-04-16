@@ -61,7 +61,6 @@
           showRefresh : annotationProperties.annotationRefresh
         })).appendTo(this.container.find('.mirador-osd-annotation-controls'));
         this.annotationElement.hide();
-        this.setQtips(this.container.find('.mirador-osd-annotation-controls'));
         this.setBorderFillColorPickers();
       }
 
@@ -84,7 +83,9 @@
         this.manipulationElement.hide();
       }
 
+      this.setQtips(this.container.find('.mirador-osd-annotation-controls'));
       this.setQtips(this.container.find('.mirador-clipping-control'));
+      this.setQtips(this.container.find('.mirador-download-control'));
 
       this.bindEvents();
     },
